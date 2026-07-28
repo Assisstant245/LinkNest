@@ -1,4 +1,4 @@
-@props(['leftTab' => 'link', 'blocks' => [], 'theme' => [], 'themePresets' => [], 'activePresetSlug' => null, 'upgradeNotice' => null])
+@props(['leftTab' => 'link', 'blocks' => [], 'theme' => [], 'themePresets' => [], 'activePresetSlug' => null, 'upgradeNotice' => null, 'shopLogoUrl' => null])
 
 <aside class="w-72 shrink-0 border-r border-gray-200 bg-white flex flex-col h-full">
     <div class="px-4 pt-4 pb-3 border-b border-gray-100 shrink-0">
@@ -54,6 +54,37 @@
             </div>
         @elseif($leftTab === 'shop')
             @php $products = collect($blocks)->filter(fn ($b) => $b['type'] === 'product')->values(); @endphp
+            <div>
+                <h3 class="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-3">Shop logo</h3>
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-full overflow-hidden bg-gray-100 border border-gray-200 shrink-0 flex items-center justify-center">
+                        @if ($shopLogoUrl)
+                            <img src="{{ $shopLogoUrl }}" class="w-full h-full object-cover">
+                        @else
+                            <x-ui.icon name="image" class="w-4 h-4 text-gray-300" />
+                        @endif
+                    </div>
+                    <div class="flex-1 flex items-center gap-2">
+                        <label class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-200 text-gray-700 hover:border-indigo-300 text-xs font-medium px-3 py-2 cursor-pointer transition-colors">
+                            <span wire:loading.remove wire:target="shopLogoUpload">{{ $shopLogoUrl ? 'Replace' : 'Upload' }}</span>
+                            <span wire:loading wire:target="shopLogoUpload">Uploading…</span>
+                            <input type="file" wire:model="shopLogoUpload" accept="image/png,image/jpeg,image/webp,image/gif" class="hidden">
+                        </label>
+                        @if ($shopLogoUrl)
+                            <button type="button" wire:click="removeShopLogo"
+                                class="shrink-0 w-8 h-8 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors"
+                                title="Remove">
+                                <x-ui.icon name="trash" class="w-3.5 h-3.5" />
+                            </button>
+                        @endif
+                    </div>
+                </div>
+                @error('shopLogoUpload')
+                    <p class="mt-1.5 text-[11px] text-red-600">{{ $message }}</p>
+                @enderror
+                <p class="mt-1.5 text-[11px] text-gray-400">Shown above your products on the Shop tab</p>
+            </div>
+
             <div>
                 <h3 class="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-3">Products</h3>
                 <div class="grid grid-cols-2 gap-2.5">

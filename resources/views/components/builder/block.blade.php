@@ -33,7 +33,7 @@ $icons = [
         'rounded-xl transition-all duration-150 hover:[transform:var(--token-hover-transform)] hover:[opacity:var(--token-hover-opacity)]',
         'ring-2 ring-indigo-500 ring-offset-2 ring-offset-gray-50' => $selected,
     ])>
-        <x-builder.block-style :data="$block['data']">
+        <x-builder.block-style :data="$block['data']" :type="$block['type']">
             <x-dynamic-component :component="'builder.blocks.' . $block['type']" :data="$block['data']" />
         </x-builder.block-style>
     </div>

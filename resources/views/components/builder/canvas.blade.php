@@ -10,6 +10,7 @@
     'socialLinks' => [],
     'selectedSocialLinkId' => null,
     'availableSocialNetworks' => [],
+    'shopLogoUrl' => null,
 ])
 
 <section class="relative flex-1 min-w-0 h-full overflow-hidden bg-gray-50">
@@ -43,6 +44,17 @@
                                     class="flex-1 text-center text-xs font-semibold rounded-full py-1.5 transition-colors">
                                     Shop
                                 </button>
+                            </div>
+                        </div>
+
+                        <div x-show="tab === 'shop'" x-cloak class="mb-3 flex justify-center"
+                            style="padding-left: var(--token-card-padding, 20px); padding-right: var(--token-card-padding, 20px);">
+                            <div class="w-14 h-14 rounded-full overflow-hidden bg-gray-50 border border-gray-200 shadow-sm flex items-center justify-center">
+                                @if ($shopLogoUrl)
+                                    <img src="{{ $shopLogoUrl }}" class="w-full h-full object-cover">
+                                @else
+                                    <x-ui.icon name="image" class="w-5 h-5 text-gray-300" />
+                                @endif
                             </div>
                         </div>
                     @endif

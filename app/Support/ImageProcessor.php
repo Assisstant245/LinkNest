@@ -27,6 +27,11 @@ class ImageProcessor
         return self::process($file, 'cover-photos', fn ($image) => $image->cover(1200, 400), quality: 80);
     }
 
+    public static function shopLogo(UploadedFile $file): string
+    {
+        return self::process($file, 'shop-logos', fn ($image) => $image->cover(300, 300), quality: 85);
+    }
+
     public static function blockImage(UploadedFile $file): string
     {
         return self::process($file, 'block-images', fn ($image) => $image->scaleDown(width: 1200), quality: 80);

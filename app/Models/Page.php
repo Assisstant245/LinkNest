@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Page extends Model
 {
     protected $fillable = [
-        'user_id', 'profile_name', 'profile_bio', 'profile_photo_path', 'cover_photo_path', 'theme', 'social_links',
+        'user_id', 'profile_name', 'profile_bio', 'profile_photo_path', 'cover_photo_path', 'shop_logo_path', 'theme', 'social_links',
         'slug', 'custom_domain', 'published_at',
     ];
 
@@ -64,11 +64,17 @@ class Page extends Model
         return ImageProcessor::url($this->cover_photo_path);
     }
 
+    public function shopLogoUrl(): ?string
+    {
+        return ImageProcessor::url($this->shop_logo_path);
+    }
+
     protected static function booted(): void
     {
         static::deleting(function (Page $page) {
             ImageProcessor::delete($page->profile_photo_path);
             ImageProcessor::delete($page->cover_photo_path);
+            ImageProcessor::delete($page->shop_logo_path);
             ImageProcessor::delete($page->theme['background']['path'] ?? null);
 
             foreach ($page->links as $link) {

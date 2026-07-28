@@ -55,6 +55,10 @@ class Editor extends Component
 
     public $coverPhotoUpload = null;
 
+    public ?string $shopLogoPath = null;
+
+    public $shopLogoUpload = null;
+
     public $backgroundImageUpload = null;
 
     public $blockImageUpload = null;
@@ -194,6 +198,7 @@ class Editor extends Component
         $this->publicUrl = $page->slug ? $page->publicUrl() : null;
         $this->profilePhotoPath = $page->profile_photo_path;
         $this->coverPhotoPath = $page->cover_photo_path;
+        $this->shopLogoPath = $page->shop_logo_path;
     }
 
     /**
@@ -234,6 +239,7 @@ class Editor extends Component
         // at it has actually been saved.
         $oldProfilePhotoPath = $page->profile_photo_path;
         $oldCoverPhotoPath = $page->cover_photo_path;
+        $oldShopLogoPath = $page->shop_logo_path;
         $oldBackground = $page->theme['background'] ?? [];
         $oldBackgroundPath = ($oldBackground['type'] ?? null) === 'image' ? ($oldBackground['path'] ?? null) : null;
         $oldLinkImagePaths = $page->exists
@@ -245,6 +251,7 @@ class Editor extends Component
             'profile_bio' => $this->profileBio,
             'profile_photo_path' => $this->profilePhotoPath,
             'cover_photo_path' => $this->coverPhotoPath,
+            'shop_logo_path' => $this->shopLogoPath,
             'theme' => $this->theme,
             'social_links' => $this->sanitizedSocialLinks(),
         ]);
@@ -273,6 +280,10 @@ class Editor extends Component
 
         if ($oldCoverPhotoPath && $oldCoverPhotoPath !== $this->coverPhotoPath) {
             ImageProcessor::delete($oldCoverPhotoPath);
+        }
+
+        if ($oldShopLogoPath && $oldShopLogoPath !== $this->shopLogoPath) {
+            ImageProcessor::delete($oldShopLogoPath);
         }
 
         $newBackgroundPath = ($this->theme['background']['type'] ?? null) === 'image'
@@ -419,6 +430,26 @@ class Editor extends Component
     public function removeCoverPhoto(): void
     {
         $this->coverPhotoPath = null;
+    }
+
+    public function updatedShopLogoUpload(): void
+    {
+        $this->validate(['shopLogoUpload' => 'image|max:5120|mimes:jpg,jpeg,png,webp,gif']);
+
+        try {
+            $this->shopLogoPath = ImageProcessor::shopLogo($this->shopLogoUpload);
+        } catch (RuntimeException) {
+            $this->addError('shopLogoUpload', 'That image could not be processed. Try a different file.');
+
+            return;
+        }
+
+        $this->shopLogoUpload = null;
+    }
+
+    public function removeShopLogo(): void
+    {
+        $this->shopLogoPath = null;
     }
 
     public function updatedBackgroundImageUpload(): void
@@ -761,6 +792,7 @@ class Editor extends Component
             'profilePhotoUrl' => $this->pendingProfilePhotoUrl ?? ImageProcessor::url($this->profilePhotoPath),
             'profilePhotoProcessing' => $this->profilePhotoProcessing,
             'coverPhotoUrl' => ImageProcessor::url($this->coverPhotoPath),
+            'shopLogoUrl' => ImageProcessor::url($this->shopLogoPath),
             'filteredIcons' => IconLibrary::search($this->iconSearch),
         ]);
     }

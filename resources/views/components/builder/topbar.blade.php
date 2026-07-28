@@ -44,6 +44,14 @@
                 <div class="border-t border-gray-100 mt-1 pt-1">
                     <a href="{{ route('dashboard') }}" class="block px-3 py-2 text-sm text-gray-500 hover:bg-gray-50">Manage all pages</a>
                 </div>
+                <div class="border-t border-gray-100 mt-1 pt-1">
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="block w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50">
+                            Logout
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
 

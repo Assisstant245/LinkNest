@@ -5,14 +5,31 @@
     'variant' => 'filled',
     'thumbnail' => false,
     'featured' => false,
+    'buttonBg' => null,
+    'buttonRadius' => null,
+    'buttonShadow' => null,
 ])
 
 @php
+$shadowMap = [
+    'none' => 'none',
+    'soft' => '0 1px 3px rgba(0,0,0,0.08)',
+    'strong' => '0 12px 28px rgba(0,0,0,0.18)',
+    'glow' => '0 0 18px 2px var(--token-primary, #6366f1)',
+];
+$resolvedButtonShadow = $buttonShadow !== null ? ($shadowMap[$buttonShadow] ?? 'none') : 'var(--token-button-shadow, none)';
+
 $styles = match ($variant) {
-    'gradient' => 'background: linear-gradient(to right, var(--token-primary, #6366f1), var(--token-secondary, #8b5cf6)); color: #fff; border: 0;',
-    'outline' => 'background: var(--token-surface, #fff); color: var(--token-text, #111827); border: 2px solid var(--token-text, #111827);',
-    'soft' => 'background: var(--token-surface, #fff); color: var(--token-text, #111827); border: 1px solid var(--token-border, #e5e7eb);',
-    default => 'background: var(--token-primary, #111827); color: #fff; border: 0;',
+    'gradient' => $buttonBg
+        ? "background: {$buttonBg}; color: var(--token-text, #fff); border: 0;"
+        : 'background: linear-gradient(to right, var(--token-primary, #6366f1), var(--token-secondary, #8b5cf6)); color: var(--token-text, #fff); border: 0;',
+    'outline' => $buttonBg
+        ? "background: {$buttonBg}; color: var(--token-text, #fff); border: 2px solid {$buttonBg};"
+        : 'background: var(--token-surface, #fff); color: var(--token-text, #111827); border: 2px solid var(--token-text, #111827);',
+    'soft' => $buttonBg
+        ? "background: {$buttonBg}; color: var(--token-text, #fff); border: 1px solid {$buttonBg};"
+        : 'background: var(--token-surface, #fff); color: var(--token-text, #111827); border: 1px solid var(--token-border, #e5e7eb);',
+    default => 'background: '.($buttonBg ?: 'var(--token-primary, #111827)').'; color: var(--token-text, #fff); border: 0;',
 };
 
 $featuredShadow = $featured
@@ -22,7 +39,7 @@ $featuredShadow = $featured
 
 <div
     class="relative flex items-center gap-3 mx-auto transition-transform duration-150 hover:-translate-y-0.5 cursor-pointer"
-    style="{{ $styles }} width: var(--token-button-width, 100%); min-height: var(--token-button-height, 48px); border-radius: var(--token-button-radius, 16px); box-shadow: var(--token-button-shadow, none){{ $featuredShadow }}; padding-inline: 16px; font-family: var(--token-font, inherit);"
+    style="{{ $styles }} width: var(--token-button-width, 100%); min-height: var(--token-button-height, 48px); border-radius: {{ $buttonRadius !== null ? "{$buttonRadius}px" : 'var(--token-button-radius, 16px)' }}; box-shadow: {{ $resolvedButtonShadow }}{{ $featuredShadow }}; padding-inline: 16px; font-family: var(--token-font, inherit);"
 >
     @if($featured)
         <span

@@ -69,12 +69,21 @@
         </div>
 
         @if ($hasProducts)
-            <div id="tab-panel-shop" class="grid grid-cols-2 gap-3 px-5 pb-6" style="display: none;">
+            <div id="tab-panel-shop" class="px-5 pb-6" style="display: none;">
+                @if ($page->shop_logo_path)
+                    <div class="flex justify-center mb-4">
+                        <div class="w-14 h-14 rounded-full overflow-hidden bg-gray-50 border border-gray-200 shadow-sm">
+                            <img src="{{ $page->shopLogoUrl() }}" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+                @endif
+                <div class="grid grid-cols-2 gap-3">
                 @foreach ($productBlocks as $product)
                     <a href="{{ route('link.redirect', $product->uuid) }}" target="_blank" rel="noopener noreferrer" class="block">
                         <x-builder.blocks.product :data="$product->data" />
                     </a>
                 @endforeach
+                </div>
             </div>
 
             <script>

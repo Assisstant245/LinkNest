@@ -17,6 +17,7 @@
             :theme-presets="$themePresets"
             :active-preset-slug="$activePresetSlug"
             :upgrade-notice="$upgradeNotice"
+            :shop-logo-url="$shopLogoUrl"
         />
 
         <x-builder.canvas
@@ -31,6 +32,7 @@
             :social-links="$socialLinks"
             :selected-social-link-id="$selectedSocialLinkId"
             :available-social-networks="$availableSocialNetworks"
+            :shop-logo-url="$shopLogoUrl"
         />
 
         <x-builder.properties-panel

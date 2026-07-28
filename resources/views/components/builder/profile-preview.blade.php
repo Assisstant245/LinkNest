@@ -70,7 +70,7 @@
                         'ring-2 ring-indigo-500 ring-offset-2' =>
                             $selectedSocialLinkId === $link['id'],
                     ])>
-                    <x-builder.social-icon :network="$link['network']" />
+                    <x-builder.social-icon :network="$link['network']" :icon-bg="$link['iconBg'] ?? null" />
                 </div>
             </div>
         @endforeach

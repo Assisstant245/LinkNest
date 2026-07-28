@@ -499,86 +499,92 @@
                     wire:model.live="blocks.{{ $selectedIndex }}.data.style.margin" />
             </x-builder.property-section>
 
-            <x-builder.property-section title="Border Radius" icon="radius">
-                <div class="grid grid-cols-5 gap-2">
-                    @foreach ([['None', 'rounded-none', 0], ['Sm', 'rounded-md', 8], ['Md', 'rounded-xl', 16], ['Lg', 'rounded-2xl', 24], ['Full', 'rounded-full', 9999]] as [$label, $rounded, $px])
-                        <button type="button" class="flex flex-col items-center gap-1.5 group"
-                            wire:click="$set('blocks.{{ $selectedIndex }}.data.style.radius', {{ $px }})">
-                            <span @class([
-                                'w-full h-9 border-2 bg-gray-50 transition-colors',
-                                $rounded,
-                                'border-indigo-500 bg-indigo-50' => $radius === $px,
-                                'border-gray-200 group-hover:border-indigo-300' => $radius !== $px,
-                            ])></span>
-                            <span @class([
-                                'text-[10px] font-medium',
-                                'text-indigo-600' => $radius === $px,
-                                'text-gray-500' => $radius !== $px,
-                            ])>{{ $label }}</span>
-                        </button>
-                    @endforeach
-                </div>
-                <x-ui.slider label="Custom radius" :value="$radius" unit="px" :max="48"
-                    wire:model.live="blocks.{{ $selectedIndex }}.data.style.radius" />
-            </x-builder.property-section>
+            @unless ($selectedBlock['type'] === 'button')
+                <x-builder.property-section title="Border Radius" icon="radius">
+                    <div class="grid grid-cols-5 gap-2">
+                        @foreach ([['None', 'rounded-none', 0], ['Sm', 'rounded-md', 8], ['Md', 'rounded-xl', 16], ['Lg', 'rounded-2xl', 24], ['Full', 'rounded-full', 9999]] as [$label, $rounded, $px])
+                            <button type="button" class="flex flex-col items-center gap-1.5 group"
+                                wire:click="$set('blocks.{{ $selectedIndex }}.data.style.radius', {{ $px }})">
+                                <span @class([
+                                    'w-full h-9 border-2 bg-gray-50 transition-colors',
+                                    $rounded,
+                                    'border-indigo-500 bg-indigo-50' => $radius === $px,
+                                    'border-gray-200 group-hover:border-indigo-300' => $radius !== $px,
+                                ])></span>
+                                <span @class([
+                                    'text-[10px] font-medium',
+                                    'text-indigo-600' => $radius === $px,
+                                    'text-gray-500' => $radius !== $px,
+                                ])>{{ $label }}</span>
+                            </button>
+                        @endforeach
+                    </div>
+                    <x-ui.slider label="Custom radius" :value="$radius" unit="px" :max="48"
+                        wire:model.live="blocks.{{ $selectedIndex }}.data.style.radius" />
+                </x-builder.property-section>
+            @endunless
 
-            <x-builder.property-section title="Shadows" icon="shadow">
-                <div class="grid grid-cols-4 gap-3">
-                    @foreach ([['None', 'shadow-none', 'none'], ['Soft', 'shadow-md', 'soft'], ['Strong', 'shadow-xl', 'strong'], ['Glow', 'shadow-lg shadow-indigo-300', 'glow']] as [$label, $previewClass, $val])
-                        <button type="button" class="flex flex-col items-center gap-1.5 group"
-                            wire:click="$set('blocks.{{ $selectedIndex }}.data.style.shadow', '{{ $val }}')">
-                            <span @class([
-                                'w-full h-9 rounded-lg bg-white border transition-shadow',
-                                $previewClass,
-                                'border-indigo-400 ring-2 ring-indigo-100' => $shadow === $val,
-                                'border-gray-200' => $shadow !== $val,
-                            ])></span>
-                            <span @class([
-                                'text-[10px] font-medium',
-                                'text-indigo-600' => $shadow === $val,
-                                'text-gray-500' => $shadow !== $val,
-                            ])>{{ $label }}</span>
-                        </button>
-                    @endforeach
-                </div>
-            </x-builder.property-section>
+            @unless ($selectedBlock['type'] === 'button')
+                <x-builder.property-section title="Shadows" icon="shadow">
+                    <div class="grid grid-cols-4 gap-3">
+                        @foreach ([['None', 'shadow-none', 'none'], ['Soft', 'shadow-md', 'soft'], ['Strong', 'shadow-xl', 'strong'], ['Glow', 'shadow-lg shadow-indigo-300', 'glow']] as [$label, $previewClass, $val])
+                            <button type="button" class="flex flex-col items-center gap-1.5 group"
+                                wire:click="$set('blocks.{{ $selectedIndex }}.data.style.shadow', '{{ $val }}')">
+                                <span @class([
+                                    'w-full h-9 rounded-lg bg-white border transition-shadow',
+                                    $previewClass,
+                                    'border-indigo-400 ring-2 ring-indigo-100' => $shadow === $val,
+                                    'border-gray-200' => $shadow !== $val,
+                                ])></span>
+                                <span @class([
+                                    'text-[10px] font-medium',
+                                    'text-indigo-600' => $shadow === $val,
+                                    'text-gray-500' => $shadow !== $val,
+                                ])>{{ $label }}</span>
+                            </button>
+                        @endforeach
+                    </div>
+                </x-builder.property-section>
+            @endunless
 
-            <x-builder.property-section title="Background" icon="background">
-                <x-ui.segmented class="w-full [&>*]:flex-1">
-                    <x-ui.segment name="bg-type" value="solid" :active="$bgType === 'solid'"
-                        wire:click="$set('blocks.{{ $selectedIndex }}.data.style.background.type', 'solid')">Solid</x-ui.segment>
-                    <x-ui.segment name="bg-type" value="gradient" :active="$bgType === 'gradient'"
-                        wire:click="$set('blocks.{{ $selectedIndex }}.data.style.background.type', 'gradient')">Gradient</x-ui.segment>
-                    <x-ui.segment name="bg-type" value="image" :active="$bgType === 'image'"
-                        wire:click="$set('blocks.{{ $selectedIndex }}.data.style.background.type', 'image')">Image</x-ui.segment>
-                </x-ui.segmented>
+            @unless (in_array($selectedBlock['type'], ['button', 'social'], true))
+                <x-builder.property-section title="Background" icon="background">
+                    <x-ui.segmented class="w-full [&>*]:flex-1">
+                        <x-ui.segment name="bg-type" value="solid" :active="$bgType === 'solid'"
+                            wire:click="$set('blocks.{{ $selectedIndex }}.data.style.background.type', 'solid')">Solid</x-ui.segment>
+                        <x-ui.segment name="bg-type" value="gradient" :active="$bgType === 'gradient'"
+                            wire:click="$set('blocks.{{ $selectedIndex }}.data.style.background.type', 'gradient')">Gradient</x-ui.segment>
+                        <x-ui.segment name="bg-type" value="image" :active="$bgType === 'image'"
+                            wire:click="$set('blocks.{{ $selectedIndex }}.data.style.background.type', 'image')">Image</x-ui.segment>
+                    </x-ui.segmented>
 
-                @if ($bgType === 'image')
-                    <x-builder.blocks.placeholder icon="image" label="Per-block image backgrounds — coming soon" />
-                @else
-                    <label class="block">
-                        <p class="text-xs font-medium text-gray-600 mb-1.5">{{ $bgType === 'gradient' ? 'Gradient CSS' : 'Color' }}</p>
-                        @if ($bgType === 'gradient')
-                            <input type="text" value="{{ $bgValue }}" placeholder="linear-gradient(135deg, #6366f1, #ec4899)"
-                                wire:model.live="blocks.{{ $selectedIndex }}.data.style.background.value"
-                                class="w-full rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300">
-                        @else
-                            <div class="flex items-center gap-2 flex-wrap mb-2">
-                                @foreach (['#eef2ff', '#ffffff', '#111827', '#f3f4f6', '#fde68a'] as $color)
-                                    <x-ui.color-swatch :color="$color" :selected="$bgValue === $color"
-                                        wire:click="$set('blocks.{{ $selectedIndex }}.data.style.background.value', '{{ $color }}')" />
-                                @endforeach
-                            </div>
-                            <div class="flex items-center gap-2 rounded-lg border border-gray-200 px-2.5 py-2">
-                                <input type="color" value="{{ $bgValue ?: '#eef2ff' }}"
+                    @if ($bgType === 'image')
+                        <x-builder.blocks.placeholder icon="image" label="Per-block image backgrounds — coming soon" />
+                    @else
+                        <label class="block">
+                            <p class="text-xs font-medium text-gray-600 mb-1.5">{{ $bgType === 'gradient' ? 'Gradient CSS' : 'Color' }}</p>
+                            @if ($bgType === 'gradient')
+                                <input type="text" value="{{ $bgValue }}" placeholder="linear-gradient(135deg, #6366f1, #ec4899)"
                                     wire:model.live="blocks.{{ $selectedIndex }}.data.style.background.value"
-                                    class="w-6 h-6 rounded-full border-0 shrink-0 cursor-pointer">
-                                <span class="w-full text-xs font-medium text-gray-700 uppercase">{{ $bgValue ?: '—' }}</span>
-                            </div>
-                        @endif
-                    </label>
-                @endif
-            </x-builder.property-section>
+                                    class="w-full rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300">
+                            @else
+                                <div class="flex items-center gap-2 flex-wrap mb-2">
+                                    @foreach (['#eef2ff', '#ffffff', '#111827', '#f3f4f6', '#fde68a'] as $color)
+                                        <x-ui.color-swatch :color="$color" :selected="$bgValue === $color"
+                                            wire:click="$set('blocks.{{ $selectedIndex }}.data.style.background.value', '{{ $color }}')" />
+                                    @endforeach
+                                </div>
+                                <div class="flex items-center gap-2 rounded-lg border border-gray-200 px-2.5 py-2">
+                                    <input type="color" value="{{ $bgValue ?: '#eef2ff' }}"
+                                        wire:model.live="blocks.{{ $selectedIndex }}.data.style.background.value"
+                                        class="w-6 h-6 rounded-full border-0 shrink-0 cursor-pointer">
+                                    <span class="w-full text-xs font-medium text-gray-700 uppercase">{{ $bgValue ?: '—' }}</span>
+                                </div>
+                            @endif
+                        </label>
+                    @endif
+                </x-builder.property-section>
+            @endunless
 
             @if ($selectedBlock['type'] === 'button')
                 <x-builder.property-section title="Button Styles" icon="cursor">
@@ -606,6 +612,212 @@
                             </button>
                         @endforeach
                     </div>
+
+                    @php $buttonBg = $selectedBlock['data']['buttonBg'] ?? null; @endphp
+                    <div class="pt-1">
+                        <p class="text-xs font-medium text-gray-600 mb-2">Button background</p>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            @foreach (['#111827', '#6366f1', '#ec4899', '#10b981', '#f59e0b'] as $color)
+                                <x-ui.color-swatch :color="$color" :selected="$buttonBg === $color"
+                                    wire:click="$set('blocks.{{ $selectedIndex }}.data.buttonBg', '{{ $color }}')" />
+                            @endforeach
+                        </div>
+                        <div class="flex items-center gap-2 rounded-lg border border-gray-200 px-2.5 py-2 mt-2">
+                            <input type="color" value="{{ $buttonBg ?: '#111827' }}"
+                                wire:model.live="blocks.{{ $selectedIndex }}.data.buttonBg"
+                                class="w-6 h-6 rounded-full border-0 shrink-0 cursor-pointer">
+                            <span class="w-full text-xs font-medium text-gray-700 uppercase">{{ $buttonBg ?: 'Theme default' }}</span>
+                        </div>
+                        @if ($buttonBg)
+                            <button type="button" wire:click="$set('blocks.{{ $selectedIndex }}.data.buttonBg', null)"
+                                class="mt-2 text-[11px] text-gray-400 hover:text-gray-600">Reset to theme color</button>
+                        @endif
+                    </div>
+
+                    @php $buttonRadius = $selectedBlock['data']['buttonRadius'] ?? null; @endphp
+                    <div class="pt-1">
+                        <x-ui.slider label="Corner radius" :value="$buttonRadius ?? 16" unit="px" :max="48"
+                            wire:model.live="blocks.{{ $selectedIndex }}.data.buttonRadius" />
+                        @if ($buttonRadius !== null)
+                            <button type="button" wire:click="$set('blocks.{{ $selectedIndex }}.data.buttonRadius', null)"
+                                class="mt-1 text-[11px] text-gray-400 hover:text-gray-600">Reset to theme radius</button>
+                        @endif
+                    </div>
+
+                    @php $buttonShadow = $selectedBlock['data']['buttonShadow'] ?? 'none'; @endphp
+                    <div class="pt-1">
+                        <p class="text-xs font-medium text-gray-600 mb-2">Shadow</p>
+                        <div class="grid grid-cols-4 gap-3">
+                            @foreach ([['None', 'shadow-none', 'none'], ['Soft', 'shadow-md', 'soft'], ['Strong', 'shadow-xl', 'strong'], ['Glow', 'shadow-lg shadow-indigo-300', 'glow']] as [$label, $previewClass, $val])
+                                <button type="button" class="flex flex-col items-center gap-1.5 group"
+                                    wire:click="$set('blocks.{{ $selectedIndex }}.data.buttonShadow', '{{ $val }}')">
+                                    <span @class([
+                                        'w-full h-9 rounded-lg bg-white border transition-shadow',
+                                        $previewClass,
+                                        'border-indigo-400 ring-2 ring-indigo-100' => $buttonShadow === $val,
+                                        'border-gray-200' => $buttonShadow !== $val,
+                                    ])></span>
+                                    <span @class([
+                                        'text-[10px] font-medium',
+                                        'text-indigo-600' => $buttonShadow === $val,
+                                        'text-gray-500' => $buttonShadow !== $val,
+                                    ])>{{ $label }}</span>
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+                </x-builder.property-section>
+            @endif
+
+            @if ($selectedBlock['type'] === 'product')
+                @php
+                    $imgStyle = $selectedBlock['data']['style']['image'] ?? [];
+                    $imgRadius = $imgStyle['radius'] ?? 12;
+                    $imgShadow = $imgStyle['shadow'] ?? 'none';
+                    $imgAspect = $imgStyle['aspect'] ?? 'square';
+
+                    $textStyle = $selectedBlock['data']['style']['text'] ?? [];
+                    $textColorP = $textStyle['color'] ?? '#111827';
+                    $textFontP = $textStyle['fontFamily'] ?? 'Instrument Sans';
+                    $textSizeP = $textStyle['fontSize'] ?? 14;
+                    $textWeightP = $textStyle['fontWeight'] ?? 'medium';
+
+                    $btnStyle = $selectedBlock['data']['style']['button'] ?? [];
+                    $btnBg = $btnStyle['bg'] ?? '#6366f1';
+                    $btnText = $btnStyle['textColor'] ?? '#ffffff';
+                    $btnRadius = $btnStyle['radius'] ?? 8;
+                @endphp
+
+                <x-builder.property-section title="Image style" icon="image">
+                    <div>
+                        <p class="text-xs font-medium text-gray-600 mb-2">Aspect ratio</p>
+                        <x-ui.segmented class="w-full [&>*]:flex-1">
+                            <x-ui.segment name="img-aspect" value="square" :active="$imgAspect === 'square'"
+                                wire:click="$set('blocks.{{ $selectedIndex }}.data.style.image.aspect', 'square')">Square</x-ui.segment>
+                            <x-ui.segment name="img-aspect" value="portrait" :active="$imgAspect === 'portrait'"
+                                wire:click="$set('blocks.{{ $selectedIndex }}.data.style.image.aspect', 'portrait')">Portrait</x-ui.segment>
+                        </x-ui.segmented>
+                    </div>
+                    <x-ui.slider label="Corner radius" :value="$imgRadius" unit="px" :max="48"
+                        wire:model.live="blocks.{{ $selectedIndex }}.data.style.image.radius" />
+                    <div>
+                        <p class="text-xs font-medium text-gray-600 mb-2">Shadow</p>
+                        <div class="grid grid-cols-4 gap-3">
+                            @foreach ([['None', 'shadow-none', 'none'], ['Soft', 'shadow-md', 'soft'], ['Strong', 'shadow-xl', 'strong'], ['Glow', 'shadow-lg shadow-indigo-300', 'glow']] as [$label, $previewClass, $val])
+                                <button type="button" class="flex flex-col items-center gap-1.5 group"
+                                    wire:click="$set('blocks.{{ $selectedIndex }}.data.style.image.shadow', '{{ $val }}')">
+                                    <span @class([
+                                        'w-full h-9 rounded-lg bg-white border transition-shadow',
+                                        $previewClass,
+                                        'border-indigo-400 ring-2 ring-indigo-100' => $imgShadow === $val,
+                                        'border-gray-200' => $imgShadow !== $val,
+                                    ])></span>
+                                    <span @class([
+                                        'text-[10px] font-medium',
+                                        'text-indigo-600' => $imgShadow === $val,
+                                        'text-gray-500' => $imgShadow !== $val,
+                                    ])>{{ $label }}</span>
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+                </x-builder.property-section>
+
+                <x-builder.property-section title="Text style" icon="typography">
+                    <div>
+                        <p class="text-xs font-medium text-gray-600 mb-2">Text color</p>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            @foreach (['#111827', '#ffffff', '#6366f1', '#ec4899', '#10b981'] as $color)
+                                <x-ui.color-swatch :color="$color" :selected="$textColorP === $color"
+                                    wire:click="$set('blocks.{{ $selectedIndex }}.data.style.text.color', '{{ $color }}')" />
+                            @endforeach
+                        </div>
+                        <div class="flex items-center gap-2 rounded-lg border border-gray-200 px-2.5 py-2 mt-2">
+                            <input type="color" value="{{ $textColorP }}"
+                                wire:model.live="blocks.{{ $selectedIndex }}.data.style.text.color"
+                                class="w-6 h-6 rounded-full border-0 shrink-0 cursor-pointer">
+                            <span class="w-full text-xs font-medium text-gray-700 uppercase">{{ $textColorP }}</span>
+                        </div>
+                    </div>
+                    <label class="block">
+                        <p class="text-xs font-medium text-gray-600 mb-1.5">Font family</p>
+                        <div class="relative">
+                            <select wire:model.live="blocks.{{ $selectedIndex }}.data.style.text.fontFamily"
+                                class="w-full appearance-none rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300">
+                                @foreach (['Instrument Sans', 'Inter', 'Poppins', 'Playfair Display'] as $font)
+                                    <option value="{{ $font }}" @selected($textFontP === $font)>{{ $font }}</option>
+                                @endforeach
+                            </select>
+                            <x-ui.icon name="chevron-down"
+                                class="w-3.5 h-3.5 text-gray-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        </div>
+                    </label>
+                    <x-ui.slider label="Font size" :value="$textSizeP" unit="px" :min="10" :max="28"
+                        wire:model.live="blocks.{{ $selectedIndex }}.data.style.text.fontSize" />
+                    <div>
+                        <p class="text-xs font-medium text-gray-600 mb-2">Weight</p>
+                        <x-ui.segmented class="w-full [&>*]:flex-1">
+                            @foreach (['regular' => 'Regular', 'medium' => 'Medium', 'bold' => 'Bold'] as $val => $label)
+                                <x-ui.segment name="text-weight" :value="$val" :active="$textWeightP === $val"
+                                    wire:click="$set('blocks.{{ $selectedIndex }}.data.style.text.fontWeight', '{{ $val }}')">
+                                    {{ $label }}
+                                </x-ui.segment>
+                            @endforeach
+                        </x-ui.segmented>
+                    </div>
+                </x-builder.property-section>
+
+                <x-builder.property-section title="Button style" icon="cursor">
+                    <div>
+                        <p class="text-xs font-medium text-gray-600 mb-2">Background</p>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            @foreach (['#6366f1', '#111827', '#ec4899', '#10b981', '#f59e0b'] as $color)
+                                <x-ui.color-swatch :color="$color" :selected="$btnBg === $color"
+                                    wire:click="$set('blocks.{{ $selectedIndex }}.data.style.button.bg', '{{ $color }}')" />
+                            @endforeach
+                        </div>
+                        <div class="flex items-center gap-2 rounded-lg border border-gray-200 px-2.5 py-2 mt-2">
+                            <input type="color" value="{{ $btnBg }}"
+                                wire:model.live="blocks.{{ $selectedIndex }}.data.style.button.bg"
+                                class="w-6 h-6 rounded-full border-0 shrink-0 cursor-pointer">
+                            <span class="w-full text-xs font-medium text-gray-700 uppercase">{{ $btnBg }}</span>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-xs font-medium text-gray-600 mb-2">Text color</p>
+                        <div class="flex items-center gap-2 rounded-lg border border-gray-200 px-2.5 py-2">
+                            <input type="color" value="{{ $btnText }}"
+                                wire:model.live="blocks.{{ $selectedIndex }}.data.style.button.textColor"
+                                class="w-6 h-6 rounded-full border-0 shrink-0 cursor-pointer">
+                            <span class="w-full text-xs font-medium text-gray-700 uppercase">{{ $btnText }}</span>
+                        </div>
+                    </div>
+                    <x-ui.slider label="Corner radius" :value="$btnRadius" unit="px" :max="30"
+                        wire:model.live="blocks.{{ $selectedIndex }}.data.style.button.radius" />
+                </x-builder.property-section>
+            @endif
+
+            @if ($selectedBlock['type'] === 'social')
+                @php $iconBg = $selectedBlock['data']['iconBg'] ?? null; @endphp
+                <x-builder.property-section title="Icon Style" icon="background">
+                    <p class="text-xs font-medium text-gray-600 mb-2">Icon background</p>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        @foreach (['#ffffff', '#111827', '#6366f1', '#ec4899', '#10b981'] as $color)
+                            <x-ui.color-swatch :color="$color" :selected="$iconBg === $color"
+                                wire:click="$set('blocks.{{ $selectedIndex }}.data.iconBg', '{{ $color }}')" />
+                        @endforeach
+                    </div>
+                    <div class="flex items-center gap-2 rounded-lg border border-gray-200 px-2.5 py-2 mt-2">
+                        <input type="color" value="{{ $iconBg ?: '#ffffff' }}"
+                            wire:model.live="blocks.{{ $selectedIndex }}.data.iconBg"
+                            class="w-6 h-6 rounded-full border-0 shrink-0 cursor-pointer">
+                        <span class="w-full text-xs font-medium text-gray-700 uppercase">{{ $iconBg ?: 'Theme default' }}</span>
+                    </div>
+                    @if ($iconBg)
+                        <button type="button" wire:click="$set('blocks.{{ $selectedIndex }}.data.iconBg', null)"
+                            class="mt-2 text-[11px] text-gray-400 hover:text-gray-600">Reset to theme color</button>
+                    @endif
+                    <p class="mt-3 text-[11px] text-gray-400">Icon color itself is controlled by the Colors section's "Text color" above.</p>
                 </x-builder.property-section>
             @endif
         @elseif($selectedSocialLink)
@@ -629,6 +841,28 @@
                     <x-ui.icon name="trash" class="w-3.5 h-3.5" />
                     Remove link
                 </button>
+            </x-builder.property-section>
+
+            @php $socialIconBg = $selectedSocialLink['iconBg'] ?? null; @endphp
+            <x-builder.property-section title="Icon Style" icon="background">
+                <p class="text-xs font-medium text-gray-600 mb-2">Icon background</p>
+                <div class="flex items-center gap-2 flex-wrap">
+                    @foreach (['#ffffff', '#111827', '#6366f1', '#ec4899', '#10b981'] as $color)
+                        <x-ui.color-swatch :color="$color" :selected="$socialIconBg === $color"
+                            wire:click="$set('socialLinks.{{ $selectedSocialIndex }}.iconBg', '{{ $color }}')" />
+                    @endforeach
+                </div>
+                <div class="flex items-center gap-2 rounded-lg border border-gray-200 px-2.5 py-2 mt-2">
+                    <input type="color" value="{{ $socialIconBg ?: '#ffffff' }}"
+                        wire:model.live="socialLinks.{{ $selectedSocialIndex }}.iconBg"
+                        class="w-6 h-6 rounded-full border-0 shrink-0 cursor-pointer">
+                    <span class="w-full text-xs font-medium text-gray-700 uppercase">{{ $socialIconBg ?: 'Theme default' }}</span>
+                </div>
+                @if ($socialIconBg)
+                    <button type="button" wire:click="$set('socialLinks.{{ $selectedSocialIndex }}.iconBg', null)"
+                        class="mt-2 text-[11px] text-gray-400 hover:text-gray-600">Reset to theme color</button>
+                @endif
+                <p class="mt-3 text-[11px] text-gray-400">Icon color itself is controlled by the page Theme's text color.</p>
             </x-builder.property-section>
         @else
             <x-builder.property-section title="Profile" icon="swatch" :open="true">

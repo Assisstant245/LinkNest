@@ -1,4 +1,4 @@
-@props(['data' => []])
+@props(['data' => [], 'type' => null])
 
 @php
 $style = $data['style'] ?? [];
@@ -29,6 +29,14 @@ if (array_key_exists('radius', $style) && $style['radius'] !== null) {
 }
 
 $direct = [];
+
+// --token-card-radius above only reaches blocks (video/image/product/...)
+// that explicitly reference it on their own inner element. Simple blocks
+// like Text/Heading/Contact never do, so the wrapper itself needs a real
+// border-radius too, or the setting has no visible effect for them.
+if ($type !== 'button' && array_key_exists('radius', $style) && $style['radius'] !== null) {
+    $direct[] = "border-radius: {$style['radius']}px";
+}
 
 if (!empty($style['bold']) || ($style['fontWeight'] ?? null) === 'bold') {
     $direct[] = 'font-weight: 700';
@@ -62,11 +70,19 @@ if (isset($style['gap'])) {
     $direct[] = "margin-bottom: {$style['gap']}px";
 }
 
-if (!empty($style['shadow'])) {
+// Same reasoning as the background guard above: buttons render their own
+// box-shadow on the pill itself (see the buttonShadow prop), so the wrapper's
+// shadow would only ever show as a mismatched rectangular sliver behind it.
+if ($type !== 'button' && !empty($style['shadow'])) {
     $direct[] = 'box-shadow: '.($shadowMap[$style['shadow']] ?? $shadowMap['none']);
 }
 
-if (!empty($style['background']['value'])) {
+// Button blocks render their own fill (theme color, variant preset, or the
+// dedicated "Button background" picker) on the pill itself — applying the
+// generic wrapper background here would only ever show as a sliver in the
+// padding around the button, not on the button. Social blocks have the same
+// issue: each icon's circle fill is its own element, not the wrapper.
+if (!in_array($type, ['button', 'social'], true) && !empty($style['background']['value'])) {
     $direct[] = 'background: '.$style['background']['value'];
 }
 
