@@ -13,7 +13,7 @@
             class="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-b from-indigo-500 to-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm shadow-indigo-500/30 hover:from-indigo-400 hover:to-indigo-600 transition-colors"
         >
             <x-ui.icon name="plus" class="w-4 h-4" />
-            Create new page
+            Create new 
         </button>
     </div>
 
