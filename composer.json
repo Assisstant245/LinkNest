@@ -10,10 +10,13 @@
         "intervention/image": "^3.11",
         "laravel/cashier": "^16.6",
         "laravel/framework": "^12.0",
+        "laravel/socialite": "^5.29",
         "laravel/tinker": "^2.10.1",
         "league/flysystem-aws-s3-v3": "^3.35",
         "livewire/livewire": "^3.6.4",
-        "livewire/volt": "^1.7.0"
+        "livewire/volt": "^1.7.0",
+        "mallardduck/blade-lucide-icons": "^1.26",
+        "predis/predis": "^3.5"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

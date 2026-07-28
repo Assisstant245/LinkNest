@@ -6,4 +6,5 @@
     :icon="$data['icon'] ?? null"
     :variant="$data['variant'] ?? 'filled'"
     :thumbnail="$data['thumbnail'] ?? false"
+    :featured="$data['featured'] ?? false"
 />

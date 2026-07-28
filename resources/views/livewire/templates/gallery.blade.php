@@ -40,6 +40,13 @@ $categories = [
         </div>
     </div>
 
+    @if ($upgradeNotice)
+        <div class="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-800">
+            {{ $upgradeNotice }}
+            <a href="{{ route('billing') }}" class="font-semibold underline">Upgrade</a>
+        </div>
+    @endif
+
     <div class="mt-6 flex flex-col md:flex-row md:items-center gap-3">
         <label class="relative flex-1 md:max-w-xs">
             <x-ui.icon name="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -86,6 +93,8 @@ $categories = [
                         :preview-color="$template['previewColor']"
                         :selected="$selectedSlug === $template['slug']"
                         :view-mode="$viewMode"
+                        :pro="$template['pro'] ?? false"
+                        :locked="($template['pro'] ?? false) && ! $isPro"
                     />
                 @endforeach
             </div>
@@ -112,9 +121,15 @@ $categories = [
                     </svg>
                 </div>
 
+                @php $selectedLocked = ($selectedTemplate['pro'] ?? false) && ! $isPro; @endphp
                 <div class="p-6">
                     <div class="flex items-center justify-between gap-2">
-                        <h2 class="text-lg font-bold text-gray-900">{{ $selectedTemplate['name'] }}</h2>
+                        <h2 class="text-lg font-bold text-gray-900 flex items-center gap-1.5">
+                            {{ $selectedTemplate['name'] }}
+                            @if ($selectedLocked)
+                                <x-ui.icon name="lock" class="w-3.5 h-3.5 text-amber-500" />
+                            @endif
+                        </h2>
                         <span class="shrink-0 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full" style="background: {{ $selectedTemplate['previewColor'] }}1a; color: {{ $selectedTemplate['previewColor'] }};">
                             {{ $selectedTemplate['category'] }}
                         </span>
@@ -125,9 +140,15 @@ $categories = [
                         <button type="button" wire:click="closePreview" class="flex-1 text-sm font-medium rounded-lg border border-gray-200 text-gray-700 px-4 py-2.5 hover:border-gray-300 transition-colors">
                             Close
                         </button>
-                        <button type="button" wire:click="applyTemplate('{{ $selectedTemplate['slug'] }}')" class="flex-1 text-sm font-semibold rounded-lg bg-indigo-600 text-white px-4 py-2.5 hover:bg-indigo-500 transition-colors">
-                            Apply Template
-                        </button>
+                        @if ($selectedLocked)
+                            <a href="{{ route('billing') }}" class="flex-1 text-sm font-semibold rounded-lg bg-indigo-600 text-white px-4 py-2.5 hover:bg-indigo-500 transition-colors text-center">
+                                Upgrade to Pro
+                            </a>
+                        @else
+                            <button type="button" wire:click="applyTemplate('{{ $selectedTemplate['slug'] }}')" class="flex-1 text-sm font-semibold rounded-lg bg-indigo-600 text-white px-4 py-2.5 hover:bg-indigo-500 transition-colors">
+                                Apply Template
+                            </button>
+                        @endif
                     </div>
                 </div>
             </div>

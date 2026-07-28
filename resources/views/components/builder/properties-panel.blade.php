@@ -4,6 +4,11 @@
     'profileName' => '',
     'profileBio' => '',
     'photoUrl' => null,
+    'profilePhotoProcessing' => false,
+    'coverPhotoUrl' => null,
+    'theme' => [],
+    'iconSearch' => '',
+    'filteredIcons' => [],
     'selectedSocialLink' => null,
     'selectedSocialIndex' => null,
 ])
@@ -19,6 +24,7 @@
         'image' => 'Image',
         'video' => 'Video',
         'contact' => 'Contact',
+        'product' => 'Product',
     ];
     $typeIcons = [
         'heading' => 'heading',
@@ -30,6 +36,7 @@
         'image' => 'image',
         'video' => 'video',
         'contact' => 'contact',
+        'product' => 'lucide:shopping-bag',
     ];
     $socialNetworks = config('builder.social_networks', []);
 @endphp
@@ -60,7 +67,7 @@
             <div class="mt-3 flex items-center gap-2.5 rounded-lg bg-indigo-50/70 border border-indigo-100 px-3 py-2.5">
                 <span
                     class="w-7 h-7 rounded-md bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white shrink-0">
-                    <x-ui.icon :name="$typeIcons[$selectedBlock['type']] ?? 'button'" class="w-3.5 h-3.5" />
+                    <x-builder.link-icon :name="$typeIcons[$selectedBlock['type']] ?? 'button'" class="w-3.5 h-3.5" />
                 </span>
                 <div class="min-w-0">
                     <p class="text-xs font-semibold text-gray-900 truncate">
@@ -140,6 +147,178 @@
                                     @endforeach
                                 </div>
                             </div>
+                            <div class="relative" x-data="{ open: false }">
+                                <p class="text-xs font-medium text-gray-600 mb-2">Icon</p>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" @click="open = !open" @click.outside="open = false"
+                                        class="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-indigo-300 transition-colors shrink-0">
+                                        @if (!empty($selectedBlock['data']['icon']))
+                                            <x-builder.link-icon :name="$selectedBlock['data']['icon']" class="w-4 h-4" />
+                                        @else
+                                            <x-ui.icon name="close" class="w-3.5 h-3.5 text-gray-300" />
+                                        @endif
+                                    </button>
+                                    <span class="text-[11px] text-gray-400">
+                                        {{ !empty($selectedBlock['data']['icon']) ? 'Click to change' : 'No icon selected' }}
+                                    </span>
+                                </div>
+
+                                <div x-show="open" x-cloak x-transition @click.stop
+                                    class="absolute z-20 top-full mt-2 left-0 w-64 bg-white border border-gray-200 rounded-xl shadow-lg p-3 space-y-2.5">
+                                    <input type="text" wire:model.live.debounce.300ms="iconSearch"
+                                        placeholder="Search icons…"
+                                        class="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300">
+
+                                    <div class="max-h-48 overflow-y-auto grid grid-cols-6 gap-1.5">
+                                        <button type="button"
+                                            wire:click="setBlockIcon('{{ $selectedBlock['id'] }}', null)"
+                                            @click="open = false" title="None"
+                                            @class([
+                                                'w-8 h-8 rounded-lg flex items-center justify-center border transition-colors',
+                                                'border-indigo-500 bg-indigo-50 text-indigo-600' =>
+                                                    empty($selectedBlock['data']['icon']),
+                                                'border-gray-200 text-gray-400 hover:border-indigo-300' =>
+                                                    !empty($selectedBlock['data']['icon']),
+                                            ])>
+                                            <x-ui.icon name="close" class="w-3.5 h-3.5" />
+                                        </button>
+                                        @forelse ($filteredIcons as $iconValue)
+                                            <button type="button"
+                                                wire:click="setBlockIcon('{{ $selectedBlock['id'] }}', '{{ $iconValue }}')"
+                                                @click="open = false"
+                                                title="{{ str_replace('-', ' ', ucfirst(str($iconValue)->after('lucide:'))) }}"
+                                                @class([
+                                                    'w-8 h-8 rounded-lg flex items-center justify-center border transition-colors',
+                                                    'border-indigo-500 bg-indigo-50 text-indigo-600' =>
+                                                        ($selectedBlock['data']['icon'] ?? null) === $iconValue,
+                                                    'border-gray-200 text-gray-400 hover:border-indigo-300' =>
+                                                        ($selectedBlock['data']['icon'] ?? null) !== $iconValue,
+                                                ])>
+                                                <x-builder.link-icon :name="$iconValue" class="w-4 h-4" />
+                                            </button>
+                                        @empty
+                                            <p class="col-span-6 text-[11px] text-gray-400 text-center py-2">No icons found.</p>
+                                        @endforelse
+                                    </div>
+                                </div>
+                            </div>
+                            <label class="flex items-center justify-between">
+                                <span class="text-xs font-medium text-gray-600">Featured</span>
+                                <input type="checkbox" wire:model.live="blocks.{{ $selectedIndex }}.data.featured"
+                                    class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500/40">
+                            </label>
+                        @break
+
+                        @case('video')
+                            @php $blockVideoUrl = \App\Support\VideoProcessor::url($selectedBlock['data']['path'] ?? null); @endphp
+                            <div class="space-y-2">
+                                @if ($blockVideoUrl)
+                                    <video controls class="w-full h-32 rounded-lg border border-gray-200"
+                                        src="{{ $blockVideoUrl }}"></video>
+                                @endif
+                                <div class="flex items-center gap-2">
+                                    <label
+                                        class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-200 text-gray-700 hover:border-indigo-300 text-xs font-medium px-3 py-2 cursor-pointer transition-colors">
+                                        <span wire:loading.remove
+                                            wire:target="blockVideoUpload">{{ $blockVideoUrl ? 'Replace video' : 'Upload video' }}</span>
+                                        <span wire:loading wire:target="blockVideoUpload">Uploading…</span>
+                                        <input type="file" wire:model="blockVideoUpload"
+                                            accept="video/mp4,video/webm,video/ogg,video/quicktime" class="hidden">
+                                    </label>
+                                    @if ($blockVideoUrl)
+                                        <button type="button" wire:click="removeBlockVideo('{{ $selectedBlock['id'] }}')"
+                                            class="shrink-0 w-8 h-8 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors"
+                                            title="Remove">
+                                            <x-ui.icon name="trash" class="w-3.5 h-3.5" />
+                                        </button>
+                                    @endif
+                                </div>
+                                <p class="text-[11px] text-gray-400">MP4, MOV, WebM, or Ogg — up to 40MB.</p>
+                                @error('blockVideoUpload')
+                                    <p class="text-[11px] text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <label class="block">
+                                <p class="text-xs font-medium text-gray-600 mb-1.5">Or paste a video URL</p>
+                                <input type="text" wire:model.live="blocks.{{ $selectedIndex }}.data.url"
+                                    placeholder="https://youtube.com/watch?v=…"
+                                    @disabled($blockVideoUrl)
+                                    class="w-full rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <p class="mt-1.5 text-[11px] text-gray-400">YouTube, Vimeo, or a direct video file link.</p>
+                            </label>
+                        @break
+
+                        @case('contact')
+                            <label class="block">
+                                <p class="text-xs font-medium text-gray-600">Email</p>
+                                <input type="email" wire:model.live="blocks.{{ $selectedIndex }}.data.email"
+                                    placeholder="you@example.com"
+                                    class="w-full rounded-lg border border-gray-200 text-xs font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300">
+                            </label>
+                            <label class="block">
+                                <p class="text-xs font-medium text-gray-600 ">Phone</p>
+                                <input type="tel" wire:model.live="blocks.{{ $selectedIndex }}.data.phone"
+                                    placeholder="+1 555 123 4567"
+                                    class="w-full rounded-lg border border-gray-200 text-xs font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300">
+                            </label>
+                        @break
+
+                        @case('product')
+                            @php $productImageUrl = \App\Support\ImageProcessor::url($selectedBlock['data']['path'] ?? null); @endphp
+                            <div class="space-y-2">
+                                @if ($productImageUrl)
+                                    <img src="{{ $productImageUrl }}"
+                                        class="w-full h-32 rounded-lg object-cover border border-gray-200">
+                                @endif
+                                <div class="flex items-center gap-2">
+                                    <label
+                                        class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-200 text-gray-700 hover:border-indigo-300 text-xs font-medium px-3 py-2 cursor-pointer transition-colors">
+                                        <span wire:loading.remove
+                                            wire:target="productImageUpload">{{ $productImageUrl ? 'Replace' : 'Upload image' }}</span>
+                                        <span wire:loading wire:target="productImageUpload">Uploading…</span>
+                                        <input type="file" wire:model="productImageUpload"
+                                            accept="image/png,image/jpeg,image/webp,image/gif" class="hidden">
+                                    </label>
+                                    @if ($productImageUrl)
+                                        <button type="button" wire:click="removeProductImage('{{ $selectedBlock['id'] }}')"
+                                            class="shrink-0 w-8 h-8 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors"
+                                            title="Remove">
+                                            <x-ui.icon name="trash" class="w-3.5 h-3.5" />
+                                        </button>
+                                    @endif
+                                </div>
+                                @error('productImageUpload')
+                                    <p class="text-[11px] text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <label class="block">
+                                <p class="text-xs font-medium text-gray-600 mb-1.5">Product name</p>
+                                <input type="text" wire:model.live="blocks.{{ $selectedIndex }}.data.name"
+                                    placeholder="Digital Planner"
+                                    class="w-full rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300">
+                            </label>
+                            <label class="block">
+                                <p class="text-xs font-medium text-gray-600 mb-1.5">Description</p>
+                                <textarea wire:model.live="blocks.{{ $selectedIndex }}.data.description" rows="2"
+                                    placeholder="Stay organized and productive"
+                                    class="w-full rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300"></textarea>
+                            </label>
+                            <label class="block">
+                                <p class="text-xs font-medium text-gray-600 mb-1.5">Price</p>
+                                <div class="flex items-center rounded-lg border border-gray-200 px-3 focus-within:ring-2 focus-within:ring-indigo-500/30 focus-within:border-indigo-300">
+                                    <span class="text-xs font-medium text-gray-400">$</span>
+                                    <input type="number" step="0.01" min="0" wire:model.live="blocks.{{ $selectedIndex }}.data.price"
+                                        placeholder="12.99"
+                                        class="w-full border-0 bg-transparent px-1.5 py-2 text-xs font-medium text-gray-700 focus:outline-none focus:ring-0">
+                                </div>
+                            </label>
+                            <label class="block">
+                                <p class="text-xs font-medium text-gray-600 mb-1.5">Buy link</p>
+                                <input type="text" wire:model.live="blocks.{{ $selectedIndex }}.data.url"
+                                    placeholder="https://your-store.com/product"
+                                    class="w-full rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300">
+                                <p class="mt-1.5 text-[11px] text-gray-400">Where "Buy Now" sends visitors — your store, payment link, etc.</p>
+                            </label>
                         @break
 
                         @case('image')
@@ -182,6 +361,7 @@
                             <div>
                                 <p class="text-xs font-medium text-gray-600 mb-2">Networks</p>
                                 <div class="flex flex-wrap gap-2">
+     
                                     @foreach ($socialNetworks as $network)
                                         <button type="button"
                                             wire:click="toggleSocialNetwork('{{ $selectedBlock['id'] }}', '{{ $network }}')"
@@ -482,6 +662,81 @@
                         </div>
                     </div>
                     @error('profilePhotoUpload')
+                        <p class="mt-1.5 text-[11px] text-red-600">{{ $message }}</p>
+                    @enderror
+                    @if ($profilePhotoProcessing)
+                        <p wire:poll.2s="pollProfilePhotoStatus" class="mt-1.5 text-[11px] text-gray-400">
+                            Processing image…
+                        </p>
+                    @endif
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-gray-600 mb-2">Cover photo</p>
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 shrink-0 flex items-center justify-center">
+                            @if ($coverPhotoUrl)
+                                <img src="{{ $coverPhotoUrl }}" class="w-full h-full object-cover">
+                            @else
+                                <x-ui.icon name="image" class="w-4 h-4 text-gray-300" />
+                            @endif
+                        </div>
+                        <div class="flex-1 flex items-center gap-2">
+                            <label
+                                class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-200 text-gray-700 hover:border-indigo-300 text-xs font-medium px-3 py-2 cursor-pointer transition-colors">
+                                <span wire:loading.remove
+                                    wire:target="coverPhotoUpload">{{ $coverPhotoUrl ? 'Replace' : 'Upload' }}</span>
+                                <span wire:loading wire:target="coverPhotoUpload">Uploading…</span>
+                                <input type="file" wire:model="coverPhotoUpload"
+                                    accept="image/png,image/jpeg,image/webp,image/gif" class="hidden">
+                            </label>
+                            @if ($coverPhotoUrl)
+                                <button type="button" wire:click="removeCoverPhoto"
+                                    class="shrink-0 w-8 h-8 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors"
+                                    title="Remove">
+                                    <x-ui.icon name="trash" class="w-3.5 h-3.5" />
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                    @error('coverPhotoUpload')
+                        <p class="mt-1.5 text-[11px] text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div>
+                    @php
+                        $bgIsImage = ($theme['background']['type'] ?? null) === 'image';
+                        $bgUrl = $bgIsImage ? \App\Support\ImageProcessor::url($theme['background']['path'] ?? null) : null;
+                    @endphp
+                    <p class="text-xs font-medium text-gray-600 mb-2">Background photo</p>
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-12 h-12 rounded-full overflow-hidden bg-gray-100 border border-gray-200 shrink-0 flex items-center justify-center">
+                            @if ($bgUrl)
+                                <img src="{{ $bgUrl }}" class="w-full h-full object-cover">
+                            @else
+                                <x-ui.icon name="image" class="w-4 h-4 text-gray-300" />
+                            @endif
+                        </div>
+                        <div class="flex-1 flex items-center gap-2">
+                            <label
+                                class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-200 text-gray-700 hover:border-indigo-300 text-xs font-medium px-3 py-2 cursor-pointer transition-colors">
+                                <span wire:loading.remove
+                                    wire:target="backgroundImageUpload">{{ $bgUrl ? 'Replace' : 'Upload' }}</span>
+                                <span wire:loading wire:target="backgroundImageUpload">Uploading…</span>
+                                <input type="file" wire:model="backgroundImageUpload"
+                                    accept="image/png,image/jpeg,image/webp,image/gif" class="hidden">
+                            </label>
+                            @if ($bgUrl)
+                                <button type="button" wire:click="removeBackgroundImage"
+                                    class="shrink-0 w-8 h-8 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors"
+                                    title="Remove">
+                                    <x-ui.icon name="trash" class="w-3.5 h-3.5" />
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                    @error('backgroundImageUpload')
                         <p class="mt-1.5 text-[11px] text-red-600">{{ $message }}</p>
                     @enderror
                 </div>

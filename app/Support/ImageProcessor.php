@@ -22,9 +22,19 @@ class ImageProcessor
         return self::process($file, 'page-backgrounds', fn ($image) => $image->scaleDown(width: 1600, height: 1600), quality: 75);
     }
 
+    public static function coverPhoto(UploadedFile $file): string
+    {
+        return self::process($file, 'cover-photos', fn ($image) => $image->cover(1200, 400), quality: 80);
+    }
+
     public static function blockImage(UploadedFile $file): string
     {
         return self::process($file, 'block-images', fn ($image) => $image->scaleDown(width: 1200), quality: 80);
+    }
+
+    public static function productImage(UploadedFile $file): string
+    {
+        return self::process($file, 'product-images', fn ($image) => $image->cover(600, 600), quality: 80);
     }
 
     public static function url(?string $path): ?string

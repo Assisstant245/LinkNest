@@ -120,6 +120,7 @@ class TemplateCatalog
                 'category' => 'Business',
                 'description' => 'A professional hub for hours, contact details, and services.',
                 'previewColor' => '#0891b2',
+                'pro' => true,
                 'profileName' => 'Acme & Co.',
                 'profileBio' => 'Trusted local service, serving the community since 2012.',
                 'blocks' => [
@@ -136,6 +137,7 @@ class TemplateCatalog
                 'category' => 'Ecommerce',
                 'description' => 'Drive traffic straight to your storefront and best sellers.',
                 'previewColor' => '#16a34a',
+                'pro' => true,
                 'profileName' => '@shop.name',
                 'profileBio' => 'New drop every Friday ✦ Free shipping over $50.',
                 'blocks' => [
@@ -151,6 +153,7 @@ class TemplateCatalog
                 'category' => 'Creative',
                 'description' => 'Push listeners to your latest release across every platform.',
                 'previewColor' => '#be185d',
+                'pro' => true,
                 'profileName' => '@artist.name',
                 'profileBio' => 'New single out now ✦ Listen everywhere.',
                 'blocks' => [
@@ -166,6 +169,7 @@ class TemplateCatalog
                 'category' => 'Business',
                 'description' => 'Programs, booking, and transformation highlights for coaches.',
                 'previewColor' => '#ea580c',
+                'pro' => true,
                 'profileName' => '@coach.strong',
                 'profileBio' => 'Certified trainer ✦ Helping you hit your goals.',
                 'blocks' => [

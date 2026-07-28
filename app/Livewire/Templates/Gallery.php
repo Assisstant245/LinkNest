@@ -17,6 +17,8 @@ class Gallery extends Component
 
     public ?string $selectedSlug = null;
 
+    public ?string $upgradeNotice = null;
+
     public function setCategory(string $category): void
     {
         $this->activeCategory = $category;
@@ -39,6 +41,16 @@ class Gallery extends Component
 
     public function applyTemplate(string $slug)
     {
+        $template = TemplateCatalog::find($slug);
+
+        if (($template['pro'] ?? false) && ! auth()->user()->isPro()) {
+            $this->upgradeNotice = "\"{$template['name']}\" is a Pro template. Upgrade to use it.";
+
+            return;
+        }
+
+        $this->upgradeNotice = null;
+
         session(['applyTemplateSlug' => $slug]);
 
         return redirect()->route('builder');
@@ -63,6 +75,7 @@ class Gallery extends Component
         return view('livewire.templates.gallery', [
             'templates' => $templates,
             'selectedTemplate' => $this->selectedSlug ? TemplateCatalog::find($this->selectedSlug) : null,
+            'isPro' => auth()->user()->isPro(),
         ]);
     }
 }

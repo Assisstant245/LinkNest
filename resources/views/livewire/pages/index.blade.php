@@ -63,6 +63,9 @@
                 </div>
 
                 <div class="flex items-center gap-2 shrink-0">
+                    <a href="{{ route('pages.overview', $page) }}" class="text-xs font-semibold rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 px-3 py-2 hover:border-indigo-300 transition-colors">
+                        Overview
+                    </a>
                     <button type="button" wire:click="editPage({{ $page->id }})" class="text-xs font-semibold rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 px-3 py-2 hover:border-indigo-300 transition-colors">
                         Edit
                     </button>

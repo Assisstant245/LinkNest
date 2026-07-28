@@ -40,6 +40,15 @@ $isPro = auth()->user()->isPro();
 
             @if($isPro)
                 <span class="mt-6 inline-flex items-center justify-center w-full rounded-lg bg-indigo-50 dark:bg-indigo-500/10 px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400">You're on Pro</span>
+                <button
+                    type="button"
+                    wire:click="manageBilling"
+                    wire:loading.attr="disabled"
+                    class="mt-2 inline-flex items-center justify-center w-full rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:border-indigo-300 transition-colors disabled:opacity-60"
+                >
+                    <span wire:loading.remove wire:target="manageBilling">Manage billing</span>
+                    <span wire:loading wire:target="manageBilling">Redirecting…</span>
+                </button>
             @else
                 <button
                     type="button"

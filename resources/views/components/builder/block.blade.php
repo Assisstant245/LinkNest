@@ -8,6 +8,7 @@ $icons = [
 @endphp
 
 <div
+    {{ $attributes }}
     wire:key="block-{{ $block['id'] }}"
     data-id="{{ $block['id'] }}"
     wire:click.stop="selectBlock('{{ $block['id'] }}')"

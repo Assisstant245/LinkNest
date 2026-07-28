@@ -1,4 +1,4 @@
-@props(['slug', 'name', 'category', 'description', 'previewColor', 'selected' => false, 'viewMode' => 'grid'])
+@props(['slug', 'name', 'category', 'description', 'previewColor', 'selected' => false, 'viewMode' => 'grid', 'pro' => false, 'locked' => false])
 
 <div @class([
     'group relative rounded-2xl border bg-white overflow-hidden transition-all duration-150 hover:-translate-y-1 hover:shadow-lg',
@@ -22,7 +22,12 @@
 
     <div class="p-4 flex-1 min-w-0 flex flex-col">
         <div class="flex items-center justify-between gap-2">
-            <h3 class="text-sm font-semibold text-gray-900 truncate">{{ $name }}</h3>
+            <h3 class="text-sm font-semibold text-gray-900 truncate flex items-center gap-1">
+                {{ $name }}
+                @if ($locked)
+                    <x-ui.icon name="lock" class="w-3 h-3 text-amber-500 shrink-0" />
+                @endif
+            </h3>
             <span class="shrink-0 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full" style="background: {{ $previewColor }}1a; color: {{ $previewColor }};">
                 {{ $category }}
             </span>
@@ -37,16 +42,25 @@
             >
                 Preview
             </button>
-            <button
-                type="button"
-                wire:click="applyTemplate('{{ $slug }}')"
-                wire:loading.attr="disabled"
-                wire:target="applyTemplate('{{ $slug }}')"
-                class="flex-1 text-xs font-semibold rounded-lg bg-indigo-600 text-white px-3 py-2 hover:bg-indigo-500 transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40"
-            >
-                <span wire:loading.remove wire:target="applyTemplate('{{ $slug }}')">Apply Template</span>
-                <span wire:loading wire:target="applyTemplate('{{ $slug }}')">Applying…</span>
-            </button>
+            @if ($locked)
+                <a
+                    href="{{ route('billing') }}"
+                    class="flex-1 text-xs font-semibold rounded-lg bg-indigo-600 text-white px-3 py-2 hover:bg-indigo-500 transition-colors text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40"
+                >
+                    Upgrade to Pro
+                </a>
+            @else
+                <button
+                    type="button"
+                    wire:click="applyTemplate('{{ $slug }}')"
+                    wire:loading.attr="disabled"
+                    wire:target="applyTemplate('{{ $slug }}')"
+                    class="flex-1 text-xs font-semibold rounded-lg bg-indigo-600 text-white px-3 py-2 hover:bg-indigo-500 transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40"
+                >
+                    <span wire:loading.remove wire:target="applyTemplate('{{ $slug }}')">Apply Template</span>
+                    <span wire:loading wire:target="applyTemplate('{{ $slug }}')">Applying…</span>
+                </button>
+            @endif
         </div>
     </div>
 </div>

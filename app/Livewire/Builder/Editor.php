@@ -2,11 +2,14 @@
 
 namespace App\Livewire\Builder;
 
+use App\Jobs\ProcessProfileImage;
 use App\Models\Link;
 use App\Models\Page;
+use App\Support\IconLibrary;
 use App\Support\ImageProcessor;
-use App\Support\TemplateCatalog;
+use App\Support\TemplateCatalog;       
 use App\Support\ThemePresets;
+use App\Support\VideoProcessor;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
@@ -14,6 +17,8 @@ use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use RuntimeException;
+use Illuminate\Support\Facades\Auth;
+
 
 #[Layout('components.layouts.builder', ['title' => 'Builder'])]
 class Editor extends Component
@@ -42,11 +47,25 @@ class Editor extends Component
 
     public $profilePhotoUpload = null;
 
+    public ?string $pendingProfilePhotoUrl = null;
+
+    public bool $profilePhotoProcessing = false;
+
+    public ?string $coverPhotoPath = null;
+
+    public $coverPhotoUpload = null;
+
     public $backgroundImageUpload = null;
 
     public $blockImageUpload = null;
 
-    public string $leftTab = 'elements';
+    public $blockVideoUpload = null;
+
+    public $productImageUpload = null;
+
+    public string $iconSearch = '';
+
+    public string $leftTab = 'link';
 
     public string $device = 'mobile';
 
@@ -95,13 +114,25 @@ class Editor extends Component
         $this->theme = $theme ?? ThemePresets::default();
 
         // 1. Explicit pageId passed in from the frontend takes priority.
-        $page = $pageId ? Page::with('links')->where('user_id', auth()->id())->find($pageId) : null;
+        $page = $pageId ? Page::with('links')->where('user_id', Auth::id())->find($pageId) : null;
 
         // 2. Otherwise, fall back to whatever the session already had.
         if (! $page) {
-            $existingPageId = session('builder.page_id');
-            $page = $existingPageId ? Page::with('links')->where('user_id', auth()->id())->find($existingPageId) : null;
-        }
+    $existingPageId = session('builder.page_id');
+
+    if ($existingPageId) {
+        $page = Page::with('links')
+            ->where('user_id', Auth::id())
+            ->find($existingPageId);
+    }
+
+    if (! $page) {
+        $page = Page::with('links')
+            ->where('user_id', Auth::id())
+            ->latest()
+            ->first();
+    }
+}
 
         if ($page) {
             $this->loadFromPage($page);
@@ -162,6 +193,7 @@ class Editor extends Component
         $this->isPublished = $page->isPublished();
         $this->publicUrl = $page->slug ? $page->publicUrl() : null;
         $this->profilePhotoPath = $page->profile_photo_path;
+        $this->coverPhotoPath = $page->cover_photo_path;
     }
 
     /**
@@ -193,14 +225,15 @@ class Editor extends Component
         }
 
         $page = $this->pageId
-            ? Page::where('user_id', auth()->id())->findOrFail($this->pageId)
-            : new Page(['user_id' => auth()->id()]);
+            ? Page::where('user_id', Auth::id())->findOrFail($this->pageId)
+            : new Page(['user_id' => Auth::id()]);
 
         // Capture what's currently persisted before it's overwritten, so any
         // image that's no longer referenced after this save can be cleaned up
         // safely — never delete a file before the state that stops pointing
         // at it has actually been saved.
         $oldProfilePhotoPath = $page->profile_photo_path;
+        $oldCoverPhotoPath = $page->cover_photo_path;
         $oldBackground = $page->theme['background'] ?? [];
         $oldBackgroundPath = ($oldBackground['type'] ?? null) === 'image' ? ($oldBackground['path'] ?? null) : null;
         $oldLinkImagePaths = $page->exists
@@ -211,6 +244,7 @@ class Editor extends Component
             'profile_name' => $this->profileName,
             'profile_bio' => $this->profileBio,
             'profile_photo_path' => $this->profilePhotoPath,
+            'cover_photo_path' => $this->coverPhotoPath,
             'theme' => $this->theme,
             'social_links' => $this->sanitizedSocialLinks(),
         ]);
@@ -235,6 +269,10 @@ class Editor extends Component
 
         if ($oldProfilePhotoPath && $oldProfilePhotoPath !== $this->profilePhotoPath) {
             ImageProcessor::delete($oldProfilePhotoPath);
+        }
+
+        if ($oldCoverPhotoPath && $oldCoverPhotoPath !== $this->coverPhotoPath) {
+            ImageProcessor::delete($oldCoverPhotoPath);
         }
 
         $newBackgroundPath = ($this->theme['background']['type'] ?? null) === 'image'
@@ -264,7 +302,7 @@ class Editor extends Component
     {
         $this->save(); // reuse existing save() to persist current state first
 
-        $page = Page::where('user_id', auth()->id())->findOrFail($this->pageId);
+        $page = Page::where('user_id', Auth::id())->findOrFail($this->pageId);
 
         if (! $page->slug) {
             $page->slug = $this->generateUniqueSlug($this->profileName);
@@ -316,20 +354,71 @@ class Editor extends Component
     {
         $this->validate(['profilePhotoUpload' => 'image|max:5120|mimes:jpg,jpeg,png,webp,gif']);
 
-        try {
-            $this->profilePhotoPath = ImageProcessor::profilePhoto($this->profilePhotoUpload);
-        } catch (RuntimeException) {
-            $this->addError('profilePhotoUpload', 'That image could not be processed. Try a different file.');
+        if (! $this->pageId) {
+            // Page isn't persisted yet — there's no row for a background job
+            // to attach to, so process inline exactly as before.
+            try {
+                $this->profilePhotoPath = ImageProcessor::profilePhoto($this->profilePhotoUpload);
+            } catch (RuntimeException) {
+                $this->addError('profilePhotoUpload', 'That image could not be processed. Try a different file.');
+
+                return;
+            }
+
+            $this->profilePhotoUpload = null;
 
             return;
         }
 
+        $this->pendingProfilePhotoUrl = $this->profilePhotoUpload->temporaryUrl();
+        $tempPath = $this->profilePhotoUpload->store('profile-uploads-pending', 'local');
+
+        ProcessProfileImage::dispatch(Page::findOrFail($this->pageId), $tempPath);
+
+        $this->profilePhotoProcessing = true;
         $this->profilePhotoUpload = null;
+    }
+
+    public function pollProfilePhotoStatus(): void
+    {
+        if (! $this->profilePhotoProcessing || ! $this->pageId) {
+            return;
+        }
+
+        $current = Page::find($this->pageId)?->profile_photo_path;
+
+        if ($current && $current !== $this->profilePhotoPath) {
+            $this->profilePhotoPath = $current;
+            $this->profilePhotoProcessing = false;
+            $this->pendingProfilePhotoUrl = null;
+        }
     }
 
     public function removeProfilePhoto(): void
     {
         $this->profilePhotoPath = null;
+        $this->pendingProfilePhotoUrl = null;
+        $this->profilePhotoProcessing = false;
+    }
+
+    public function updatedCoverPhotoUpload(): void
+    {
+        $this->validate(['coverPhotoUpload' => 'image|max:5120|mimes:jpg,jpeg,png,webp,gif']);
+
+        try {
+            $this->coverPhotoPath = ImageProcessor::coverPhoto($this->coverPhotoUpload);
+        } catch (RuntimeException) {
+            $this->addError('coverPhotoUpload', 'That image could not be processed. Try a different file.');
+
+            return;
+        }
+
+        $this->coverPhotoUpload = null;
+    }
+
+    public function removeCoverPhoto(): void
+    {
+        $this->coverPhotoPath = null;
     }
 
     public function updatedBackgroundImageUpload(): void
@@ -386,6 +475,67 @@ class Editor extends Component
         unset($this->blocks[$index]['data']['path']);
     }
 
+    public function updatedProductImageUpload(): void
+    {
+        $index = $this->selectedBlockId ? $this->indexOf($this->selectedBlockId) : null;
+
+        if ($index === null) {
+            return;
+        }
+
+        $this->validate(['productImageUpload' => 'image|max:5120|mimes:jpg,jpeg,png,webp,gif']);
+
+        try {
+            $path = ImageProcessor::productImage($this->productImageUpload);
+        } catch (RuntimeException) {
+            $this->addError('productImageUpload', 'That image could not be processed. Try a different file.');
+
+            return;
+        }
+
+        $this->blocks[$index]['data']['path'] = $path;
+        $this->productImageUpload = null;
+    }
+
+    public function removeProductImage(string $id): void
+    {
+        $index = $this->indexOf($id);
+
+        if ($index === null) {
+            return;
+        }
+
+        unset($this->blocks[$index]['data']['path']);
+    }
+
+    public function updatedBlockVideoUpload(): void
+    {
+        $index = $this->selectedBlockId ? $this->indexOf($this->selectedBlockId) : null;
+
+        if ($index === null) {
+            return;
+        }
+
+        $this->validate(['blockVideoUpload' => 'file|max:40960|mimes:mp4,mov,webm,ogg']);
+
+        $path = VideoProcessor::store($this->blockVideoUpload);
+
+        $this->blocks[$index]['data']['path'] = $path;
+        $this->blocks[$index]['data']['url'] = null;
+        $this->blockVideoUpload = null;
+    }
+
+    public function removeBlockVideo(string $id): void
+    {
+        $index = $this->indexOf($id);
+
+        if ($index === null) {
+            return;
+        }
+
+        unset($this->blocks[$index]['data']['path']);
+    }
+
     public function setLeftTab(string $tab): void
     {
         $this->leftTab = $tab;
@@ -398,7 +548,7 @@ class Editor extends Component
 
     public function switchPage(int $id)
     {
-        $page = auth()->user()->pages()->findOrFail($id);
+        $page = Auth::user()->pages()->findOrFail($id);
 
         session(['builder.page_id' => $page->id]);
 
@@ -506,6 +656,18 @@ class Editor extends Component
             : [...$networks, $network];
     }
 
+    public function setBlockIcon(string $id, ?string $icon): void
+    {
+        $index = $this->indexOf($id);
+
+        if ($index === null) {
+            return;
+        }
+
+        $this->blocks[$index]['data']['icon'] = $icon;
+        $this->iconSearch = '';
+    }
+
     public function reorder(array $orderedIds): void
     {
         $byId = collect($this->blocks)->keyBy('id');
@@ -562,11 +724,14 @@ class Editor extends Component
         return match ($type) {
             'heading' => ['text' => 'Heading'],
             'text' => ['text' => 'Add your text here…'],
-            'button' => ['label' => 'New link', 'url' => '', 'subtitle' => null, 'icon' => 'link', 'variant' => $this->theme['buttons']['style'] ?? 'filled', 'thumbnail' => false],
+            'button' => ['label' => 'New link', 'url' => '', 'subtitle' => null, 'icon' => 'link', 'variant' => $this->theme['buttons']['style'] ?? 'filled', 'thumbnail' => false, 'featured' => false],
             'social' => ['networks' => $this->availableNetworks],
             'divider' => [],
             'spacer' => ['height' => 24],
-            'image', 'video', 'contact' => [],
+            'video' => ['url' => null, 'path' => null],
+            'contact' => ['email' => null, 'phone' => null],
+            'product' => ['name' => 'New product', 'description' => '', 'price' => null, 'path' => null, 'url' => ''],
+            'image' => [],
             default => [],
         };
     }
@@ -593,7 +758,10 @@ class Editor extends Component
                 ->all(),
             'themePresets' => ThemePresets::all(),
             'userPages' => auth()->user()->pages()->get(['id', 'profile_name']),
-            'profilePhotoUrl' => ImageProcessor::url($this->profilePhotoPath),
+            'profilePhotoUrl' => $this->pendingProfilePhotoUrl ?? ImageProcessor::url($this->profilePhotoPath),
+            'profilePhotoProcessing' => $this->profilePhotoProcessing,
+            'coverPhotoUrl' => ImageProcessor::url($this->coverPhotoPath),
+            'filteredIcons' => IconLibrary::search($this->iconSearch),
         ]);
     }
 }

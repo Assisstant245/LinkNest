@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -14,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'stripe/*',
         ]);
+    })
+    ->withSchedule(function (Schedule $schedule): void {
+        $schedule->command('digest:send-analytics')->daily();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

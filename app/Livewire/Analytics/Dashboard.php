@@ -31,9 +31,9 @@ class Dashboard extends Component
     {
         $isPro = auth()->user()->isPro();
 
-        $page = ($pageId = session('builder.page_id'))
-            ? Page::where('user_id', auth()->id())->find($pageId)
-            : null;
+        $page = Page::where('user_id', auth()->id())
+        ->latest()
+        ->first();
 
         if (! $isPro || ! $page) {
             return view('livewire.analytics.dashboard', [
@@ -101,6 +101,7 @@ class Dashboard extends Component
             ->pluck('total', 'platform');
 
         return view('livewire.analytics.dashboard', [
+            'isPro' => $isPro,
             'page' => $page,
             'totalViews' => $totalViews,
             'totalClicks' => $totalClicks,

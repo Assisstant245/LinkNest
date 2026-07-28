@@ -4,6 +4,7 @@
     'profileName' => '',
     'profileBio' => '',
     'photoUrl' => null,
+    'coverUrl' => null,
     'theme' => [],
     'device' => 'mobile',
     'socialLinks' => [],
@@ -20,20 +21,56 @@
     <div class="relative h-full overflow-y-auto px-8 py-10">
         <x-builder.device-preview :device="$device" :theme="$theme">
             <div>
-                <x-builder.profile-preview :name="$profileName" :bio="$profileBio" :photo-url="$photoUrl" :social-links="$socialLinks" :selected-social-link-id="$selectedSocialLinkId"
+                <x-builder.profile-preview :name="$profileName" :bio="$profileBio" :photo-url="$photoUrl" :cover-url="$coverUrl" :social-links="$socialLinks" :selected-social-link-id="$selectedSocialLinkId"
                     :available-social-networks="$availableSocialNetworks" />
 
-                <div x-data x-init="initCanvasSortable($el, $wire)" wire:click.self="deselectAll"
-                    class="pb-6 space-y-[var(--token-card-spacing,12px)]"
-                    style="padding-left: var(--token-card-padding, 20px); padding-right: var(--token-card-padding, 20px); min-height: 96px;">
-                    @forelse($blocks as $block)
-                        <x-builder.block :block="$block" :selected="$selectedBlockId === $block['id']" wire:key="block-{{ $block['id'] }}" />
-                    @empty
-                        <div
-                            class="text-center text-xs text-gray-400 py-10 border-2 border-dashed border-gray-200 rounded-xl">
-                            Drag a block here to get started
+                @php
+                    $hasProducts = collect($blocks)->contains(fn ($b) => $b['type'] === 'product');
+                    $hasLinkBlocks = collect($blocks)->contains(fn ($b) => $b['type'] !== 'product');
+                @endphp
+
+                <div x-data="{ tab: 'links' }">
+                    @if ($hasProducts)
+                        <div class="mb-3" style="padding-left: var(--token-card-padding, 20px); padding-right: var(--token-card-padding, 20px);">
+                            <div class="flex items-center gap-1 rounded-full bg-gray-100 p-1">
+                                <button type="button" @click="tab = 'links'"
+                                    :class="tab === 'links' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'"
+                                    class="flex-1 text-center text-xs font-semibold rounded-full py-1.5 transition-colors">
+                                    Links
+                                </button>
+                                <button type="button" @click="tab = 'shop'"
+                                    :class="tab === 'shop' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'"
+                                    class="flex-1 text-center text-xs font-semibold rounded-full py-1.5 transition-colors">
+                                    Shop
+                                </button>
+                            </div>
                         </div>
-                    @endforelse
+                    @endif
+
+                    <div x-init="initCanvasSortable($el, $wire)" wire:click.self="deselectAll"
+                        class="pb-6 space-y-[var(--token-card-spacing,12px)]"
+                        style="padding-left: var(--token-card-padding, 20px); padding-right: var(--token-card-padding, 20px); min-height: 96px;">
+                        @forelse($blocks as $block)
+                            @php
+                                $blockTab = $block['type'] === 'product' ? 'shop' : 'links';
+                                $blockShowExpr = $hasProducts ? "tab === '{$blockTab}'" : 'true';
+                            @endphp
+                            <x-builder.block :block="$block" :selected="$selectedBlockId === $block['id']"
+                                x-show="{{ $blockShowExpr }}" x-cloak />
+                        @empty
+                            <div
+                                class="text-center text-xs text-gray-400 py-10 border-2 border-dashed border-gray-200 rounded-xl">
+                                Drag a block here to get started
+                            </div>
+                        @endforelse
+
+                        @if ($hasProducts && !$hasLinkBlocks)
+                            <div x-show="tab === 'links'" x-cloak
+                                class="text-center text-xs text-gray-400 py-10 border-2 border-dashed border-gray-200 rounded-xl">
+                                Drag a block here to get started
+                            </div>
+                        @endif
+                    </div>
                 </div>
 
                 <div class="pb-8 flex justify-center">
