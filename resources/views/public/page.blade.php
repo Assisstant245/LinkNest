@@ -49,7 +49,8 @@
                     @elseif ($link->type === 'contact')
                         <div class="flex flex-col gap-5">
                             @if (!empty($link->data['email']))
-                                <a href="mailto:{{ $link->data['email'] }}" class="block">
+                                <a href="https://mail.google.com/mail/?view=cm&fs=1&to={{ urlencode($link->data['email']) }}"
+                                    target="_blank" rel="noopener noreferrer" class="block">
                                     <x-builder.link-button label="Email" :subtitle="$link->data['email']" icon="mail"
                                         variant="soft" />
                                 </a>
