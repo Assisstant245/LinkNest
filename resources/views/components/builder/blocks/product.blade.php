@@ -29,7 +29,7 @@
     $btnRadius = $btnStyle['radius'] ?? 8;
 @endphp
 
-<div class="overflow-hidden bg-white border"
+<div class="w-full overflow-hidden bg-white border"
     style="border-radius: var(--token-card-radius, 16px); border-color: var(--token-border, #e5e7eb); box-shadow: var(--token-card-shadow, none);">
     <div class="{{ $imgAspectClass }} bg-gray-50 flex items-center justify-center overflow-hidden"
         style="{{ $imgRadius !== null ? "border-radius: {$imgRadius}px;" : '' }} box-shadow: {{ $imgShadow }};">

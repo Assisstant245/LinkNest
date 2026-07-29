@@ -102,7 +102,12 @@
             <span wire:loading.remove wire:target="save">Save Draft</span>
             <span wire:loading wire:target="save">Saving…</span>
         </x-ui.button>
-        <x-ui.button variant="secondary" size="sm" icon="eye">Preview</x-ui.button>
+        <x-ui.button variant="secondary" size="sm" icon="eye" wire:click="preview"
+            wire:loading.attr="disabled" wire:target="preview"
+            x-on:open-preview.window="window.open($event.detail.url, '_blank')">
+            <span wire:loading.remove wire:target="preview">Preview</span>
+            <span wire:loading wire:target="preview">Saving…</span>
+        </x-ui.button>
         <x-ui.button variant="primary" size="sm" icon="rocket" wire:click="publish">
             {{ $isPublished ? 'Republish' : 'Publish' }}
         </x-ui.button>

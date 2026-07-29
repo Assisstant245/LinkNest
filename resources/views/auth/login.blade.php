@@ -12,12 +12,12 @@
 </head>
 <body class="font-sans antialiased text-gray-900">
 
-<div class="min-h-screen flex items-center justify-center p-6">
+<div class="min-h-screen flex items-center justify-center p-4 sm:p-6">
 
-<div class="w-full max-w-6xl rounded-3xl shadow-2xl p-6 bg-white">
+<div class="w-full max-w-6xl rounded-3xl shadow-2xl p-4 sm:p-6 bg-white">
     <div class="grid lg:grid-cols-2 overflow-hidden gap-5 rounded-2xl">
         {{-- LEFT SIDE --}}
-        <div class="p-8 lg:p-14 flex flex-col justify-center m-5">
+        <div class="p-6 sm:p-8 lg:p-14 flex flex-col justify-center">
 
             {{-- Logo --}}
             <div class="flex items-center gap-3 mb-8">
@@ -28,7 +28,7 @@
                             d="M13.828 10.172a4 4 0 010 5.656l-3 3a4 4 0 01-5.656-5.656l1.5-1.5M10.172 13.828a4 4 0 010-5.656l3-3a4 4 0 115.656 5.656l-1.5 1.5"/>
                     </svg>
                 </div>
-                <div class="m-5">
+                <div>
                     <h2 class="text-2xl font-bold">LinkNest</h2>
                     <p class="text-gray-500 text-sm">Welcome back 👋</p>
                 </div>
@@ -59,7 +59,7 @@
                 </div>
 
                 <div>
-                    <x-input-label for="password" class="mt-5" value="Password"/>
+                    <x-input-label for="password" value="Password"/>
                     <x-text-input
                         name="password"
                         id="password"
@@ -74,11 +74,11 @@
                         <input
                             name="remember"
                             type="checkbox"
-                            class="rounded border-gray-300 text-indigo-600 mt-5">
-                        <span class="ml-2 mt-5 text-sm text-gray-600">Remember me</span>
+                            class="rounded border-gray-300 text-indigo-600">
+                        <span class="ml-2 text-sm text-gray-600">Remember me</span>
                     </label>
 
-                    <a href="{{ route('password.request') }}" class="text-sm text-indigo-600 hover:underline mt-5">
+                    <a href="{{ route('password.request') }}" class="text-sm text-indigo-600 hover:underline">
                         Forgot Password?
                     </a>
                 </div>

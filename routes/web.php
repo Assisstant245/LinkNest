@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\LinkClickController;
+use App\Http\Controllers\PagePreviewController;
 use App\Http\Controllers\PublicPageController;
 use App\Livewire\Analytics\Dashboard as AnalyticsDashboard;
 use App\Livewire\Billing\Plans as BillingPlans;
@@ -17,6 +18,7 @@ Route::get('/', function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/builder', Editor::class)->name('builder');
+    Route::get('/builder/{page}/preview', [PagePreviewController::class, 'show'])->name('builder.preview');
     Route::get('/analytics', AnalyticsDashboard::class)->name('analytics');
 
     Route::get('/billing', BillingPlans::class)->name('billing');

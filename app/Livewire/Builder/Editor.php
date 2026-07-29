@@ -309,6 +309,15 @@ class Editor extends Component
         }
     }
 
+    public function preview(): void
+    {
+        $this->save();
+
+        if ($this->pageId) {
+            $this->dispatch('open-preview', url: route('builder.preview', $this->pageId));
+        }
+    }
+
     public function publish(): void
     {
         $this->save(); // reuse existing save() to persist current state first
