@@ -41,7 +41,13 @@
     $socialNetworks = config('builder.social_networks', []);
 @endphp
 
-<aside class="w-80 shrink-0 border-l border-gray-200 bg-white flex flex-col h-full">
+<div x-show="mobilePanel === 'properties'" x-cloak @click="mobilePanel = null"
+    class="fixed inset-0 bg-black/30 z-30 lg:hidden" x-transition.opacity></div>
+
+<aside
+    :class="mobilePanel === 'properties' ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'"
+    class="fixed inset-y-0 right-0 z-40 w-80 max-w-[85vw] shrink-0 border-l border-gray-200 bg-white flex flex-col h-full transition-transform duration-300 lg:static lg:z-auto lg:max-w-none lg:translate-x-0"
+>
     {{-- Header --}}
     <div class="px-4 pt-4 pb-3 border-b border-gray-100 shrink-0">
         <div class="flex items-center justify-between">
@@ -49,15 +55,21 @@
                 {{ $selectedBlock ? 'Properties' : ($selectedSocialLink ? 'Social Link' : 'Profile') }}
             </h2>
             @if ($selectedBlock)
-                <button type="button" wire:click="deselectBlock"
+                <button type="button" wire:click="deselectBlock" @click="mobilePanel = null"
                     class="text-gray-400 hover:text-gray-700 rounded-md p-1 hover:bg-gray-100 transition-colors"
                     title="Deselect">
                     <x-ui.icon name="close" class="w-4 h-4" />
                 </button>
             @elseif($selectedSocialLink)
-                <button type="button" wire:click="deselectSocialLink"
+                <button type="button" wire:click="deselectSocialLink" @click="mobilePanel = null"
                     class="text-gray-400 hover:text-gray-700 rounded-md p-1 hover:bg-gray-100 transition-colors"
                     title="Deselect">
+                    <x-ui.icon name="close" class="w-4 h-4" />
+                </button>
+            @else
+                <button type="button" @click="mobilePanel = null"
+                    class="text-gray-400 hover:text-gray-700 rounded-md p-1 hover:bg-gray-100 transition-colors lg:hidden"
+                    title="Close">
                     <x-ui.icon name="close" class="w-4 h-4" />
                 </button>
             @endif

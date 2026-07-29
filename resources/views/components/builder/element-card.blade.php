@@ -1,8 +1,9 @@
-@props(['icon', 'label', 'type', 'badge' => null])
+@props(['icon', 'label', 'type', 'badge' => null, 'index' => 0])
 
 <div
     draggable="true"
     data-type="{{ $type }}"
+    wire:click="addBlockAt('{{ $type }}', {{ $index }})"
     class="group relative flex flex-col items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-2 py-4 cursor-grab active:cursor-grabbing hover:border-indigo-300 hover:shadow-md hover:shadow-indigo-100 transition-all duration-150"
 >
     <span class="absolute top-1.5 right-1.5 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity">

@@ -1,7 +1,19 @@
 @props(['leftTab' => 'link', 'blocks' => [], 'theme' => [], 'themePresets' => [], 'activePresetSlug' => null, 'upgradeNotice' => null, 'shopLogoUrl' => null])
 
-<aside class="w-72 shrink-0 border-r border-gray-200 bg-white flex flex-col h-full">
+<div x-show="mobilePanel === 'elements'" x-cloak @click="mobilePanel = null"
+    class="fixed inset-0 bg-black/30 z-30 lg:hidden" x-transition.opacity></div>
+
+<aside
+    :class="mobilePanel === 'elements' ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+    class="fixed inset-y-0 left-0 z-40 w-72 max-w-[85vw] shrink-0 border-r border-gray-200 bg-white flex flex-col h-full transition-transform duration-300 lg:static lg:z-auto lg:max-w-none lg:translate-x-0"
+>
     <div class="px-4 pt-4 pb-3 border-b border-gray-100 shrink-0">
+        <div class="flex items-center justify-between mb-1 lg:hidden">
+            <span class="text-sm font-semibold text-gray-900">Elements</span>
+            <button type="button" @click="mobilePanel = null" class="p-1 text-gray-400 hover:text-gray-600">
+                <x-ui.icon name="close" class="w-4 h-4" />
+            </button>
+        </div>
         <x-ui.segmented class="w-full [&>*]:flex-1">
             <x-ui.segment name="left-tab" value="link" :active="$leftTab === 'link'" wire:click="setLeftTab('link')">Link</x-ui.segment>
             <x-ui.segment name="left-tab" value="shop" :active="$leftTab === 'shop'" wire:click="setLeftTab('shop')">Shop</x-ui.segment>
@@ -29,27 +41,27 @@
             <div>
                 <h3 class="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-3">Content</h3>
                 <div class="grid grid-cols-2 gap-2.5" x-data x-init="initElementsSortable($el)">
-                    <x-builder.element-card icon="heading" label="Heading" type="heading" />
-                    <x-builder.element-card icon="text" label="Text" type="text" />
-                    <x-builder.element-card icon="button" label="Button" type="button" />
-                    <x-builder.element-card icon="social" label="Social Icons" type="social" />
+                    <x-builder.element-card icon="heading" label="Heading" type="heading" :index="count($blocks)" />
+                    <x-builder.element-card icon="text" label="Text" type="text" :index="count($blocks)" />
+                    <x-builder.element-card icon="button" label="Button" type="button" :index="count($blocks)" />
+                    <x-builder.element-card icon="social" label="Social Icons" type="social" :index="count($blocks)" />
                 </div>
             </div>
 
             <div>
                 <h3 class="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-3">Media</h3>
                 <div class="grid grid-cols-2 gap-2.5" x-data x-init="initElementsSortable($el)">
-                    <x-builder.element-card icon="image" label="Image" type="image" />
-                    <x-builder.element-card icon="video" label="Video" type="video" />
+                    <x-builder.element-card icon="image" label="Image" type="image" :index="count($blocks)" />
+                    <x-builder.element-card icon="video" label="Video" type="video" :index="count($blocks)" />
                 </div>
             </div>
 
             <div>
                 <h3 class="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-3">Layout</h3>
                 <div class="grid grid-cols-2 gap-2.5" x-data x-init="initElementsSortable($el)">
-                    <x-builder.element-card icon="divider" label="Divider" type="divider" />
-                    <x-builder.element-card icon="spacer" label="Spacer" type="spacer" />
-                    <x-builder.element-card icon="contact" label="Contact" type="contact" />
+                    <x-builder.element-card icon="divider" label="Divider" type="divider" :index="count($blocks)" />
+                    <x-builder.element-card icon="spacer" label="Spacer" type="spacer" :index="count($blocks)" />
+                    <x-builder.element-card icon="contact" label="Contact" type="contact" :index="count($blocks)" />
                 </div>
             </div>
         @elseif($leftTab === 'shop')
@@ -131,7 +143,7 @@
         @endif
     </div>
 
-    @if($leftTab === 'link')
+    @if($leftTab === 'link' && ! auth()->user()->isPro())
         <div class="shrink-0 border-t border-gray-100 p-4">
             <div class="rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 p-4 text-white relative overflow-hidden">
                 <div class="absolute -right-4 -top-4 w-16 h-16 rounded-full bg-white/10"></div>

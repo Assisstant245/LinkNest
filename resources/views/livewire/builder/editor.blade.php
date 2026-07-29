@@ -1,5 +1,10 @@
-<div class="h-full flex flex-col">
+<div class="h-full flex flex-col" x-data="{ mobilePanel: null }">
     {{-- <pre style="background:#000;color:#0f0;padding:10px;font-size:11px;">{{ json_encode(collect($blocks)->map(fn($b) => ['id' => $b['id'], 'type' => $b['type'], 'label' => $b['data']['label'] ?? null]), JSON_PRETTY_PRINT) }}</pre> --}}
+
+<x-builder.mobile-navbar
+    :page-id="$pageId"
+    :user-pages="$userPages"
+/>
 
 <x-builder.topbar
     :device="$device"
@@ -50,4 +55,7 @@
             :selected-social-index="$selectedSocialIndex"
         />
     </div>
+
+    <x-builder.mobile-toolbar />
+    <x-builder.mobile-more-sheet />
 </div>
