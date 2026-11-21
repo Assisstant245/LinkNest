@@ -149,7 +149,7 @@
                 <div class="absolute -right-4 -top-4 w-16 h-16 rounded-full bg-white/10"></div>
                 <p class="text-sm font-semibold">Unlock Pro blocks</p>
                 <p class="text-xs text-white/80 mt-1 leading-relaxed">Get premium elements, analytics &amp; custom domains.</p>
-                <button type="button" class="mt-3 text-xs font-semibold bg-white text-indigo-600 rounded-lg px-3 py-1.5 hover:bg-white/90 transition-colors">Upgrade</button>
+                <a href="{{ route('billing') }}" class="mt-3 inline-block text-xs font-semibold bg-white text-indigo-600 rounded-lg px-3 py-1.5 hover:bg-white/90 transition-colors">Upgrade</a>
             </div>
         </div>
     @endif

@@ -21,7 +21,7 @@ class GoogleController extends Controller
         try {
             $googleUser = Socialite::driver('google')->user();
         } catch (Throwable) {
-            return redirect()->route('login')->with('status', 'Google sign-in failed. Please try again.');
+            return redirect()->route('login')->with('status', '');
         }
 
         $user = User::where('google_id', $googleUser->getId())->first()

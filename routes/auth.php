@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
 Route::middleware('guest')->group(function () {
+
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->name('register');
 
@@ -26,12 +27,24 @@ Route::middleware('guest')->group(function () {
 
     Volt::route('forgot-password', 'pages.auth.forgot-password')
         ->name('password.request');
-
-    Volt::route('reset-password/{token}', 'pages.auth.reset-password')
-        ->name('password.reset');
 });
 
+
+/*
+|--------------------------------------------------------------------------
+| Password Reset
+|--------------------------------------------------------------------------
+| Do NOT put this inside the guest middleware.
+| An already logged-in user should still be able to open
+| the password reset link received by email.
+*/
+
+Volt::route('reset-password/{token}', 'pages.auth.reset-password')
+    ->name('password.reset');
+
+
 Route::middleware('auth')->group(function () {
+
     Volt::route('verify-email', 'pages.auth.verify-email')
         ->name('verification.notice');
 
